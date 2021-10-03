@@ -3,7 +3,6 @@ const fs = require('fs');
 const Manager = require('./lib/Manager');
 const Engineer = require('./lib/Engineer');
 const Intern = require('./lib/Intern');
-var docMain = document.querySelector(".cardDiv");
 let teamMembers = [];
 
 const menuQuestions = [
@@ -75,7 +74,7 @@ const engineerQuestions = [
 function askInternQuestions() {
     inquirer.prompt(internQuestions)
         .then((response) => {
-            let intern = new Intern(response.name, response.idnumber, response.email, response.github)
+            let intern = new Intern(response.name, response.idnumber, response.email, response.school)
             teamMembers.push(intern)
             displayMenu()
         })
@@ -84,9 +83,8 @@ function askInternQuestions() {
 function askEngineerQuestions() {
     inquirer.prompt(engineerQuestions)
         .then((response) => {
-            let engineer = new Engineer(response.name, response.idnumber, response.email, response.school)
+            let engineer = new Engineer(response.name, response.idnumber, response.email, response.github)
             teamMembers.push(engineer)
-            console.log(teamMembers)
             displayMenu()
         })
 }
@@ -94,7 +92,6 @@ function askEngineerQuestions() {
 function displayMenu() {
     inquirer.prompt(menuQuestions)
         .then((response) => {
-            console.log(response)
             if (response.choice === 'intern') {
                 askInternQuestions();
             }
@@ -102,31 +99,118 @@ function displayMenu() {
                 askEngineerQuestions();
             }
             else {
-                addData(teamMembers);
+                console.log(teamMembers," adding data");
+                fs.writeFile("./dist/index.html", `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./style.css">
+        <title>Team Profile</title>
+    </head>
+    <body>
+        <header>
+            <h1>My Team</h1>
+        </header>
+        <main class="cardDiv">`, function (err) {
+            if (err) throw err;
+            console.log('Saved!');
+          });
+    addManagers(teamMembers);
+    setTimeout(() => {addEngineers(teamMembers)},1000);
+    setTimeout(() => {addInterns(teamMembers)},2000);
+    setTimeout(() => {addEnd()},3000);
                 
             }
         })
 };
 
-function addData(teamMembers) {
+function addManagers(teamMembers){
     teamMembers.forEach((element) => {
-        if (element.getRole() == "manager"){
-            let card = document.createElement("div");
-            card.innerHTML =
-            `<div class="cardHead">
-                <h3>${element.getName()}</h3>
-                <h4>${element.getRole()}</h4>
+        if (element.getRole() == "Manager"){
+            console.log("append manager");
+            fs.appendFile("./dist/index.html", 
+            `
+            <div class="card">
+            <div class="cardHead">
+                <h2>${element.getName()}</h2>
+                <h3>${element.getRole()}</h3>
             </div>
             <div class="cardBody">
                 <p>ID: ${element.getID()}</p>
                 <p>Email: ${element.getEmail()}</p>
-                <p>${element.getOfficeNumber()}</p>
-            </div>`
-        //append card
-        //.appendChild(card);
-        }        
+                <p>Office Number: ${element.getOfficeNumber()}</p>
+            </div>
+            </div>`,
+            function (err) {
+                if (err) throw err;
+                console.log('Saved!');
+              })
+        }     
+       
     })
 };
+function addEngineers(teamMembers){
+    teamMembers.forEach((element) => {
+        if (element.getRole() == "Engineer"){
+            console.log("append engineer");
+            fs.appendFile("./dist/index.html", 
+            `<div class="card">
+            <div class="cardHead">
+            <h2>${element.getName()}</h2>
+            <h3>${element.getRole()}</h3>
+            </div>
+            <div class="cardBody">
+                <p>ID: ${element.getID()}</p>
+                <p>Email: ${element.getEmail()}</p>
+                <p>Github Name:${element.getGithub()}</p>
+            </div>
+            </div>`,
+            function (err) {
+                if (err) throw err;
+                console.log('Saved!');
+              })
+        }     
+       
+    })
+};
+function addInterns(teamMembers){
+    teamMembers.forEach((element) => {
+        if (element.getRole() == "Intern"){
+            console.log("append intern");
+            fs.appendFile("./dist/index.html", 
+            `<div class="card">
+            <div class="cardHead">
+            <h2>${element.getName()}</h2>
+            <h3>${element.getRole()}</h3>
+            </div>
+            <div class="cardBody">
+                <p>ID: ${element.getID()}</p>
+                <p>Email: ${element.getEmail()}</p>
+                <p>School: ${element.getSchool()}</p>
+            </div>
+            </div>`,
+            function (err) {
+                if (err) throw err;
+                console.log('Saved!');
+              })
+        }     
+       
+    })
+};
+function addEnd(){
+    fs.appendFile("./dist/index.html", 
+    `</main>
+    </body>
+    </html>`,
+    function (err) {
+        if (err) throw err;
+        console.log('html Complete!');
+      })
+}
+
+
 function init() {
     inquirer.prompt(managerQuestions)
         .then((response) => {
